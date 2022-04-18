@@ -25,7 +25,6 @@ class ANM4Easier(ANM4):
 
     def init_state(self):
         n_dev, n_gen, n_des = 5, 1, 1
-        breakpoint()
 
         state = np.zeros(2 * n_dev + n_des + n_gen + self.K)
 
