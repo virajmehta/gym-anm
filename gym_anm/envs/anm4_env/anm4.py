@@ -43,6 +43,9 @@ class ANM4(ANMEnv):
     def render(self, mode='human', skip_frames=0):
         raise NotImplementedError()
 
+    def close(self):
+        pass
+
     def step(self, action):
         obs, r, done, info = super().step(action)
 
