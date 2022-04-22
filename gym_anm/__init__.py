@@ -3,7 +3,7 @@
 from gym.envs.registration import register
 
 from .agents import MPCAgentPerfect, MPCAgentConstant
-from .envs import ANMEnv
+from .envs import ANMEnv, anm4_reward
 
 register(
     id='ANM6Easy-v0',

@@ -662,13 +662,14 @@ class Simulator(object):
 
         # Compute the energy loss.
         e_loss = 0.
+        curtailment = 0.
         for dev in self.devices.values():
             if isinstance(dev, (Generator, Load)):
                 e_loss += dev.p
 
             if isinstance(dev, RenewableGen):
-                e_loss += np.maximum(0, dev.p_pot - dev.p)
-
+                curtailment += np.maximum(0, dev.p_pot - dev.p)
+        e_loss += curtailment
         e_loss *= self.delta_t
 
         # Compute the penalty term.
@@ -678,6 +679,7 @@ class Simulator(object):
             penalty += np.maximum(0, v_magn - bus.v_max) \
                        + np.maximum(0, bus.v_min - v_magn)
 
+        print([np.abs(branch.s_apparent_max) for branch in self.branches.values()])
         for branch in self.branches.values():
             penalty += np.maximum(0, np.abs(branch.s_apparent_max) - branch.rate)
 
