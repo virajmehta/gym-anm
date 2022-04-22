@@ -24,6 +24,8 @@ class ANM4Easier(ANM4):
         # Consumption and maximum generation 24-hour time series.
         self.P_loads = _get_load_time_series()
         self.P_maxs = _get_gen_time_series()
+        self.periodic_dimensions = [12]
+        self.horizon = 96
 
     def init_state(self):
         n_dev, n_gen, n_des = 5, 1, 1
@@ -146,7 +148,7 @@ def _get_gen_time_series():
 
     return P_maxs
 
-def anm4_reward(x, next_obs):
+def _anm4_reward(x, next_obs):
     # state is
     #       dev_p for 5 devices
     #       dev_q for 5 devices
@@ -226,6 +228,20 @@ def anm4_reward(x, next_obs):
     penalty *= delta_t * lamb
     reward = - (e_loss + penalty)
     return reward
+
+def anm4_reward(x, next_obs):
+    if x.ndim == 2:
+        rews = []
+        for i in range(x.shape[0]):
+            xi = x[i, :]
+            noi = next_obs[i, :]
+            rews.append(_anm4_reward(xi, noi))
+        return np.array(rews)
+    elif x.ndim == 1:
+        return _anm4_reward(x, next_obs)
+    else:
+        raise NotImplementedError()
+
 
 
 if __name__ == '__main__':
