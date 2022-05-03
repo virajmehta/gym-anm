@@ -679,7 +679,6 @@ class Simulator(object):
             penalty += np.maximum(0, v_magn - bus.v_max) \
                        + np.maximum(0, bus.v_min - v_magn)
 
-        print([np.abs(branch.s_apparent_max) for branch in self.branches.values()])
         for branch in self.branches.values():
             penalty += np.maximum(0, np.abs(branch.s_apparent_max) - branch.rate)
 
