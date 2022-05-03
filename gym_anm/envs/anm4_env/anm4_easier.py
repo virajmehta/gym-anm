@@ -10,12 +10,12 @@ from ...simulator.solve_load_flow import _construct_v_from_guess, _newton_raphso
 class ANM4Easier(ANM4):
     """The :code:`ANM4Easier-v0` task."""
 
-    def __init__(self):
+    def __init__(self, remove_constraints=False):
         observation = 'state'  # fully observable environment
         K = 1
         delta_t = 0.25         # 15 minutes between timesteps
         gamma = 0.995
-        lamb = 100
+        lamb = 100 if not remove_constraints else 0.
         aux_bounds = np.array([[0, 24 / delta_t - 1]])
         costs_clipping = (1, 100)
         super().__init__(observation, K, delta_t, gamma, lamb, aux_bounds,
@@ -223,7 +223,6 @@ def _anm4_reward(x, next_obs):
         sfrom = V[branch[0]] * np.conj(I[branch[0]])
         sto = V[branch[1]] * np.conj(I[branch[1]])
         smax_norm = np.maximum(np.abs(sfrom), np.abs(sto))
-        print(smax_norm)
         penalty += np.maximum(0, smax_norm - cap)
     penalty *= delta_t * lamb
     reward = - (e_loss + penalty)
@@ -241,6 +240,27 @@ def anm4_reward(x, next_obs):
         return _anm4_reward(x, next_obs)
     else:
         raise NotImplementedError()
+
+def unconstrained_anm4_reward(x, next_obs):
+    baseMVA = 100.
+    delta_t = 0.25
+
+    # Device 2 (wind farm) max powers
+    s1 = 40 * np.ones(25)
+    s12 = np.linspace(36.375, 14.625, 7)
+    s2 = 11 * np.ones(13)
+    s23 = np.linspace(14.725, 36.375, 7)
+    s3 = 40 * np.ones(13)
+    P4 = np.concatenate((s1, s12, s2, s23, s3, s23[::-1], s2, s12[::-1],
+                         s1[:4]))
+    aux = int((next_obs[-1]) % (24 / delta_t))
+    p_pot_2 = P4[aux] / baseMVA
+
+    e_loss = np.sum(next_obs[..., :4]) / baseMVA
+    curtailment = np.maximum(0, p_pot_2 - next_obs[..., 2] / baseMVA)
+    e_loss += curtailment
+    e_loss *= delta_t
+    return -e_loss
 
 
 
