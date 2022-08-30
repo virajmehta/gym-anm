@@ -253,8 +253,12 @@ def unconstrained_anm4_reward(x, next_obs):
     s3 = 40 * np.ones(13)
     P4 = np.concatenate((s1, s12, s2, s23, s3, s23[::-1], s2, s12[::-1],
                          s1[:4]))
-    aux = int((next_obs[-1]) % (24 / delta_t))
-    p_pot_2 = P4[aux] / baseMVA
+    if next_obs.ndim == 2:
+        aux = (next_obs[..., -1] % (24 / delta_t)).astype(int)
+        p_pot_2 = np.take(P4, aux)
+    else:
+        aux = int(next_obs[..., -1] % (24 / delta_t))
+        p_pot_2 = P4[aux] / baseMVA
 
     e_loss = np.sum(next_obs[..., :4]) / baseMVA
     curtailment = np.maximum(0, p_pot_2 - next_obs[..., 2] / baseMVA)

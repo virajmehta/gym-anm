@@ -14,3 +14,9 @@ register(
     id='ANM4Easier-v0',
     entry_point='gym_anm.envs:ANM4Easier',
 )
+
+register(
+    id='ANM4Easiest-v0',
+    entry_point='gym_anm.envs:ANM4Easier',
+    kwargs={'remove_constraints': True},
+)
