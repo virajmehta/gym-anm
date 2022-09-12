@@ -26,6 +26,7 @@ class ANM4Easier(ANM4):
         self.P_maxs = _get_gen_time_series()
         self.periodic_dimensions = [12]
         self.horizon = 96
+        self.reward_bounds = [-90, 0.]
 
     def init_state(self):
         n_dev, n_gen, n_des = 5, 1, 1
